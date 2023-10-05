@@ -51,7 +51,7 @@ if (!empty($_POST['submit'])) {
             Form người dùng
         </div>
         <form method="POST">
-            // Thêm 2 input để lấy ra giá trị value để so sánh phiên bảng
+<!--             Thêm 2 input để lấy ra giá trị value để so sánh phiên bảng-->
             <input type="hidden" name="id" value="<?php echo $_id ?>">
             <input type="hidden" name="version" value="<?= isset($user[0]['version']) ? $user[0]['version'] : 0 ?>">
             <div class="form-group">
