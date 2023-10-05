@@ -54,14 +54,37 @@ class UserModel extends BaseModel
      */
     public function updateUser($input)
     {
-        $sql = 'UPDATE users SET 
-                 name = "' . mysqli_real_escape_string(self::$_connection, $input['name']) . '", 
-                 password="' . md5($input['password']) . '"
-                WHERE id = ' . $input['id'];
+        // Lấy phiên bản hiện tại của người dùng từ cơ sở dữ liệu
+        $sql = 'SELECT version FROM users WHERE id = ' . $input['id'];
+        $result = $this->query($sql);
 
-        $user = $this->update($sql);
+        if ($result && $row = $result->fetch_assoc()) {
+            $currentVersion = (int)$row['version'];
 
-        return $user;
+            // Lấy phiên bản từ dữ liệu cập nhật
+            $newVersion = isset($input['version']) ? (int)$input['version'] : 0;
+
+            // Kiểm tra phiên bản có khớp không (kiểu số)
+            if ($newVersion === $currentVersion) {
+                // Tăng phiên bản lên 1
+                $newVersion++;
+
+                // Thêm phiên bản mới vào cơ sở dữ liệu
+                $sql = 'UPDATE users SET 
+                     name = "' . mysqli_real_escape_string(self::$_connection, $input['name']) . '", 
+                     password="' . md5($input['password']) . '",
+                     version = ' . $newVersion . ' 
+                    WHERE id = ' . $input['id'];
+
+                return $this->update($sql);
+            } else {
+                // Phiên bản không khớp, không cho phép cập nhật
+                return false;
+            }
+        } else {
+            // Không thể lấy phiên bản từ cơ sở dữ liệu
+            return false;
+        }
     }
 
     /**
