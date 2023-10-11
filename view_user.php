@@ -15,7 +15,7 @@ if (!empty($_GET['id'])) {
     // Kiểm tra quyền truy cập
     if ($currentUserId !== $id) {
         // Người dùng không có quyền truy cập vào người dùng này
-        header('Location: unauthorized.php');
+        header('Location: error.php');
         exit();
     }
 
