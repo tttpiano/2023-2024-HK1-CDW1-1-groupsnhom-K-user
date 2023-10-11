@@ -1,26 +1,37 @@
 <?php
+session_start();
+
 require_once 'models/UserModel.php';
 $userModel = new UserModel();
 
-$user = NULL; //Add new user
 $id = NULL;
+
+// Lấy id của người dùng hiện tại từ phiên (session)
+$currentUserId = !empty($_SESSION['id']) ? $_SESSION['id'] : null;
 
 if (!empty($_GET['id'])) {
     $id = $_GET['id'];
-    $user = $userModel->findUserById($id);//Update existing user
+
+    // Kiểm tra quyền truy cập
+    if ($currentUserId !== $id) {
+        // Người dùng không có quyền truy cập vào người dùng này
+        header('Location: unauthorized.php');
+        exit();
+    }
+
+    $user = $userModel->findUserById($id);
 }
 
-
+// Cập nhật hoặc thêm người dùng
 if (!empty($_POST['submit'])) {
-
     if (!empty($id)) {
         $userModel->updateUser($_POST);
     } else {
         $userModel->insertUser($_POST);
     }
     header('location: list_users.php');
+    exit();
 }
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -31,11 +42,11 @@ if (!empty($_POST['submit'])) {
 <body>
 <?php include 'views/header.php'?>
 <div class="container">
-
     <?php if ($user || empty($id)) { ?>
         <div class="alert alert-warning" role="alert">
             User profile
         </div>
+        <!-- Hiển thị thông tin người dùng -->
         <form method="POST">
             <input type="hidden" name="id" value="<?php echo $id ?>">
             <div class="form-group">

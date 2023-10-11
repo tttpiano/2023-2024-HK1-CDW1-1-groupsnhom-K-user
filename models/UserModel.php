@@ -97,7 +97,7 @@ class UserModel extends BaseModel
 
 
         $sql = "  INSERT INTO `users` (`name`, `fullname`, `email`, `type`, `password`, `version`) VALUES ( " .
-            "'" . $input['name'] . "', '', '', '', '" . md5($input['password']) . "', '0')";
+            "'" .htmlentities($input['name']) . "', '', '', '', '" . md5($input['password']) . "', '0')";
 
         $user = $this->insert($sql);
 
