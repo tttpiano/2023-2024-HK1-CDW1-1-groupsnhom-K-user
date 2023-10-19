@@ -58,9 +58,7 @@ $users = $userModel->getUsers($params);
                                 </a>
                                 <form action="delete_user.php?id=<?php echo $user['id'] ?>" method="post">
                                     <button type="submit" name="submit" value="submit">
-                                        <a href="delete_user.php?id=<?php echo $user['id'] ?>">
                                             <i class="fa fa-eraser" aria-hidden="true" title="Delete"></i>
-                                        </a>
                                     </button>
                                 </form>
                             </td>
