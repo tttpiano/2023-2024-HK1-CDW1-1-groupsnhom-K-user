@@ -24,13 +24,33 @@ class UserModel extends BaseModel {
      * @param $password
      * @return array
      */
-    public function auth($userName, $password) {
-        $md5Password = md5($password);
-        $sql = 'SELECT * FROM users WHERE name = "' . $userName . '" AND password = "'.$md5Password.'"';
-
-        $user = $this->select($sql);
-        return $user;
+ 
+     public function auth($userName, $password) {
+        // Kiểm tra xem đã tồn tại $_connection hay không
+        if (isset(self::$_connection)) {
+            // Xử lý và làm sạch dữ liệu đầu vào để ngăn chặn SQL injection
+            $userName = mysqli_real_escape_string(self::$_connection, $userName);
+            $password = mysqli_real_escape_string(self::$_connection, $password);
+    
+            // Mã hóa mật khẩu bằng MD5 (lưu ý: không được coi là an toàn, nên sử dụng phương pháp mã hóa mật khẩu mạnh mẽ hơn)
+            $md5Password = md5($password);
+    
+            // Tạo câu truy vấn SQL để kiểm tra sự khớp của tên người dùng và mật khẩu
+            $sql = 'SELECT * FROM users WHERE name = "' . $userName . '" AND password = "'.$md5Password.'"';
+            
+            // Thực thi truy vấn SQL và lấy kết quả
+            $user = $this->select($sql);
+            
+            // Trả về kết quả
+            return $user;
+        } else {
+            // In thông báo lỗi nếu kết nối chưa được thiết lập
+            printf("Connection not established");
+            exit();
+        }
     }
+
+
 
     /**
      * Delete user by id
@@ -78,20 +98,24 @@ class UserModel extends BaseModel {
      * @param array $params
      * @return array
      */
-    public function getUsers($params = []) {
-        //Keyword
-        if (!empty($params['keyword'])) {
-            $sql = 'SELECT * FROM users WHERE name LIKE "%' . $params['keyword'] .'%"';
 
-            //Keep this line to use Sql Injection
-            //Don't change
             //Example keyword: abcef%";TRUNCATE banks;##
-            $users = self::$_connection->multi_query($sql);
+      
+    public function getUsers($params = []) {
+        // Kiểm tra xem tham số `keyword` có trống không. Nếu không trống, thì thực hiện các bước sau:
+        if (!empty($params['keyword'])) {
+            $sql = 'SELECT * FROM users WHERE name LIKE ?';
+            $stmt = self::$_connection->prepare($sql);
+            $stmt->bind_param('s', $params['keyword']);
+
+            $stmt->execute();
+    
+            $users = $stmt->get_result();
         } else {
             $sql = 'SELECT * FROM users';
             $users = $this->select($sql);
         }
-
         return $users;
     }
+
 }
